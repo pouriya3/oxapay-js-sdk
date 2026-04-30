@@ -46,12 +46,18 @@ export type OxaPayAcceptedCurrency =
   | "DOGS"
   | "XRP";
 
+/**
+ * Currency code with IDE autocomplete for known symbols while still allowing custom strings.
+ * The `(string & {})` trick preserves literal suggestions in editors.
+ */
+export type OxaPayCurrencyCode = OxaPayAcceptedCurrency | (string & {});
+
 /** Request body for creating a hosted merchant invoice. */
 export interface OxaPayGenerateInvoiceRequest {
   /** Invoice amount. */
   amount: number;
   /** Fiat/crypto currency code used for invoice amount. */
-  currency?: OxaPayAcceptedCurrency | string;
+  currency?: OxaPayCurrencyCode;
   /** Invoice lifetime in minutes. */
   lifetime?: number;
   /** Whether payer pays network fees. */
@@ -59,7 +65,7 @@ export interface OxaPayGenerateInvoiceRequest {
   /** Underpaid coverage percentage. */
   under_paid_coverage?: number;
   /** Optional auto-conversion target currency. */
-  to_currency?: OxaPayAcceptedCurrency | string;
+  to_currency?: OxaPayCurrencyCode;
   /** Whether to auto-withdraw received funds. */
   auto_withdrawal?: boolean;
   /** Allow paying from mixed assets. */
@@ -95,17 +101,17 @@ export interface OxaPayGenerateInvoiceResponseData {
 /** Request body for white-label payment session creation. */
 export interface OxaPayGenerateWhiteLabelRequest {
   /** Currency payer will send. */
-  pay_currency: OxaPayAcceptedCurrency | string;
+  pay_currency: OxaPayCurrencyCode;
   /** Requested amount value. */
   amount: number;
   /** Amount currency code. */
-  currency?: OxaPayAcceptedCurrency | string;
+  currency?: OxaPayCurrencyCode;
   /** Specific chain/network if required. */
   network?: string;
   lifetime?: number;
   fee_paid_by_payer?: number;
   under_paid_coverage?: number;
-  to_currency?: OxaPayAcceptedCurrency | string;
+  to_currency?: OxaPayCurrencyCode;
   auto_withdrawal?: boolean;
   callback_url?: string;
   email?: string;
@@ -117,9 +123,9 @@ export interface OxaPayGenerateWhiteLabelRequest {
 export interface OxaPayGenerateWhiteLabelResponseData {
   track_id: string;
   amount?: number;
-  currency?: OxaPayAcceptedCurrency | string;
+  currency?: OxaPayCurrencyCode;
   pay_amount?: number;
-  pay_currency?: OxaPayAcceptedCurrency | string;
+  pay_currency?: OxaPayCurrencyCode;
   network?: string;
   address?: string;
   callback_url?: string;
@@ -140,7 +146,7 @@ export interface OxaPayGenerateStaticAddressRequest {
   /** Target network to create static address on. */
   network: string;
   /** Optional auto-conversion target currency. */
-  to_currency?: OxaPayAcceptedCurrency | string;
+  to_currency?: OxaPayCurrencyCode;
   /** 1 = withdraw to settings address, 0 = keep in balance. */
   auto_withdrawal?: number;
   /** Webhook endpoint for received payments. */
