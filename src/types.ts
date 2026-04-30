@@ -47,10 +47,65 @@ export type OxaPayAcceptedCurrency =
   | "XRP";
 
 /**
- * Currency code with IDE autocomplete for known symbols while still allowing custom strings.
+ * Fiat codes supported by OxaPay `/common/fiats` (invoice amount is typically in local fiat).
  * The `(string & {})` trick preserves literal suggestions in editors.
  */
-export type OxaPayCurrencyCode = OxaPayAcceptedCurrency | (string & {});
+export type OxaPayFiatCurrency =
+  | "USD"
+  | "AMD"
+  | "AUD"
+  | "AZN"
+  | "BRL"
+  | "CAD"
+  | "CHF"
+  | "CNH"
+  | "CNY"
+  | "CZK"
+  | "DKK"
+  | "EUR"
+  | "GBP"
+  | "GHS"
+  | "HKD"
+  | "HUF"
+  | "IDR"
+  | "ILS"
+  | "INR"
+  | "ISK"
+  | "JPY"
+  | "KRW"
+  | "KZT"
+  | "MXN"
+  | "MYR"
+  | "NOK"
+  | "NZD"
+  | "PHP"
+  | "PKR"
+  | "PLN"
+  | "RUB"
+  | "SEK"
+  | "SGD"
+  | "THB"
+  | "TMT"
+  | "TRY"
+  | "UAH"
+  | "UZS"
+  | "VND"
+  | "ZAR";
+
+/** Fiat code with IDE autocomplete while still allowing custom strings. */
+export type OxaPayFiatCode = OxaPayFiatCurrency | (string & {});
+
+/**
+ * Crypto / accepted payment currency with IDE autocomplete (e.g. `to_currency`, payouts).
+ * The `(string & {})` trick preserves literal suggestions in editors.
+ */
+export type OxaPayCryptoCode = OxaPayAcceptedCurrency | (string & {});
+
+/**
+ * @deprecated Prefer `OxaPayCryptoCode` or `OxaPayFiatCode` depending on field semantics.
+ * Kept as alias of `OxaPayCryptoCode` for backward compatibility.
+ */
+export type OxaPayCurrencyCode = OxaPayCryptoCode;
 
 /** Known payout statuses documented by OxaPay payout status table. */
 export type OxaPayPayoutStatus =
@@ -65,16 +120,16 @@ export type OxaPayPayoutStatus =
 export interface OxaPayGenerateInvoiceRequest {
   /** Invoice amount. */
   amount: number;
-  /** Fiat/crypto currency code used for invoice amount. */
-  currency?: OxaPayCurrencyCode;
+  /** Local fiat code the invoice `amount` is denominated in (e.g. USD). */
+  currency?: OxaPayFiatCode;
   /** Invoice lifetime in minutes. */
   lifetime?: number;
   /** Whether payer pays network fees. */
   fee_paid_by_payer?: number;
   /** Underpaid coverage percentage. */
   under_paid_coverage?: number;
-  /** Optional auto-conversion target currency. */
-  to_currency?: OxaPayCurrencyCode;
+  /** Optional auto-conversion target crypto (e.g. USDT). */
+  to_currency?: OxaPayCryptoCode;
   /** Whether to auto-withdraw received funds. */
   auto_withdrawal?: boolean;
   /** Allow paying from mixed assets. */
@@ -109,18 +164,19 @@ export interface OxaPayGenerateInvoiceResponseData {
 
 /** Request body for white-label payment session creation. */
 export interface OxaPayGenerateWhiteLabelRequest {
-  /** Currency payer will send. */
-  pay_currency: OxaPayCurrencyCode;
+  /** Crypto currency the payer will send. */
+  pay_currency: OxaPayCryptoCode;
   /** Requested amount value. */
   amount: number;
-  /** Amount currency code. */
-  currency?: OxaPayCurrencyCode;
+  /** Fiat (or crypto) code the `amount` is denominated in. */
+  currency?: OxaPayFiatCode | OxaPayCryptoCode;
   /** Specific chain/network if required. */
   network?: string;
   lifetime?: number;
   fee_paid_by_payer?: number;
   under_paid_coverage?: number;
-  to_currency?: OxaPayCurrencyCode;
+  /** Optional auto-conversion target crypto. */
+  to_currency?: OxaPayCryptoCode;
   auto_withdrawal?: boolean;
   callback_url?: string;
   email?: string;
@@ -132,9 +188,9 @@ export interface OxaPayGenerateWhiteLabelRequest {
 export interface OxaPayGenerateWhiteLabelResponseData {
   track_id: string;
   amount?: number;
-  currency?: OxaPayCurrencyCode;
+  currency?: OxaPayFiatCode | OxaPayCryptoCode;
   pay_amount?: number;
-  pay_currency?: OxaPayCurrencyCode;
+  pay_currency?: OxaPayCryptoCode;
   network?: string;
   address?: string;
   callback_url?: string;
@@ -154,8 +210,8 @@ export interface OxaPayGenerateWhiteLabelResponseData {
 export interface OxaPayGenerateStaticAddressRequest {
   /** Target network to create static address on. */
   network: string;
-  /** Optional auto-conversion target currency. */
-  to_currency?: OxaPayCurrencyCode;
+  /** Optional auto-conversion target crypto. */
+  to_currency?: OxaPayCryptoCode;
   /** 1 = withdraw to settings address, 0 = keep in balance. */
   auto_withdrawal?: number;
   /** Webhook endpoint for received payments. */
@@ -271,8 +327,8 @@ export interface OxaPayPaymentHistoryResponseData {
 export interface OxaPayGeneratePayoutRequest {
   /** Recipient wallet address. */
   address: string;
-  /** Currency symbol to send. */
-  currency: string;
+  /** Crypto symbol to send (e.g. BTC, USDT). */
+  currency: OxaPayCryptoCode;
   /** Amount to transfer. */
   amount: number;
   /** Specific blockchain network if currency has multiple networks. */
@@ -338,7 +394,7 @@ export interface OxaPayPayoutHistoryResponseData {
 /** Query options for account balance endpoint. */
 export interface OxaPayAccountBalanceQuery {
   /** Optional specific currency to return balance for. */
-  currency?: OxaPayCurrencyCode;
+  currency?: OxaPayCryptoCode;
   [key: string]: string | number | boolean | undefined;
 }
 
@@ -445,10 +501,10 @@ export interface OxaPayCommonFiatInfo {
   [key: string]: unknown;
 }
 
-/** Dynamic mapping of fiat code to fiat metadata. */
-export interface OxaPayCommonFiatsResponseData {
-  [fiat: string]: OxaPayCommonFiatInfo;
-}
+/** Mapping of fiat code to metadata from `/common/fiats` (keys match supported fiats). */
+export type OxaPayCommonFiatsResponseData = {
+  [K in OxaPayFiatCurrency]?: OxaPayCommonFiatInfo;
+};
 
 /** Network-specific metadata inside common currencies response. */
 export interface OxaPayCommonNetworkInfo {
