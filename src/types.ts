@@ -22,12 +22,36 @@ export interface OxaPayApiEnvelope<T> {
   version?: string;
 }
 
+/**
+ * Currency symbols currently returned by `/payment/accepted-currencies`.
+ * Useful for IDE autocomplete when setting payment-related currency fields.
+ */
+export type OxaPayAcceptedCurrency =
+  | "BTC"
+  | "ETH"
+  | "USDT"
+  | "USDC"
+  | "BNB"
+  | "DOGE"
+  | "POL"
+  | "LTC"
+  | "SOL"
+  | "TRX"
+  | "SHIB"
+  | "TON"
+  | "XMR"
+  | "DAI"
+  | "BCH"
+  | "NOT"
+  | "DOGS"
+  | "XRP";
+
 /** Request body for creating a hosted merchant invoice. */
 export interface OxaPayGenerateInvoiceRequest {
   /** Invoice amount. */
   amount: number;
   /** Fiat/crypto currency code used for invoice amount. */
-  currency?: string;
+  currency?: OxaPayAcceptedCurrency | string;
   /** Invoice lifetime in minutes. */
   lifetime?: number;
   /** Whether payer pays network fees. */
@@ -35,7 +59,7 @@ export interface OxaPayGenerateInvoiceRequest {
   /** Underpaid coverage percentage. */
   under_paid_coverage?: number;
   /** Optional auto-conversion target currency. */
-  to_currency?: string;
+  to_currency?: OxaPayAcceptedCurrency | string;
   /** Whether to auto-withdraw received funds. */
   auto_withdrawal?: boolean;
   /** Allow paying from mixed assets. */
@@ -71,17 +95,17 @@ export interface OxaPayGenerateInvoiceResponseData {
 /** Request body for white-label payment session creation. */
 export interface OxaPayGenerateWhiteLabelRequest {
   /** Currency payer will send. */
-  pay_currency: string;
+  pay_currency: OxaPayAcceptedCurrency | string;
   /** Requested amount value. */
   amount: number;
   /** Amount currency code. */
-  currency?: string;
+  currency?: OxaPayAcceptedCurrency | string;
   /** Specific chain/network if required. */
   network?: string;
   lifetime?: number;
   fee_paid_by_payer?: number;
   under_paid_coverage?: number;
-  to_currency?: string;
+  to_currency?: OxaPayAcceptedCurrency | string;
   auto_withdrawal?: boolean;
   callback_url?: string;
   email?: string;
@@ -93,9 +117,9 @@ export interface OxaPayGenerateWhiteLabelRequest {
 export interface OxaPayGenerateWhiteLabelResponseData {
   track_id: string;
   amount?: number;
-  currency?: string;
+  currency?: OxaPayAcceptedCurrency | string;
   pay_amount?: number;
-  pay_currency?: string;
+  pay_currency?: OxaPayAcceptedCurrency | string;
   network?: string;
   address?: string;
   callback_url?: string;
@@ -116,7 +140,7 @@ export interface OxaPayGenerateStaticAddressRequest {
   /** Target network to create static address on. */
   network: string;
   /** Optional auto-conversion target currency. */
-  to_currency?: string;
+  to_currency?: OxaPayAcceptedCurrency | string;
   /** 1 = withdraw to settings address, 0 = keep in balance. */
   auto_withdrawal?: number;
   /** Webhook endpoint for received payments. */
@@ -145,7 +169,7 @@ export interface OxaPayRevokeStaticAddressRequest {
 /** Response payload for accepted currencies endpoint. */
 export interface OxaPayAcceptedCurrenciesResponseData {
   /** List of currencies enabled on your merchant service. */
-  list: string[];
+  list: OxaPayAcceptedCurrency[];
 }
 
 /** Static address row from static address list endpoint. */
