@@ -47,10 +47,70 @@ export type OxaPayAcceptedCurrency =
   | "XRP";
 
 /**
- * Currency code with IDE autocomplete for known symbols while still allowing custom strings.
+ * Fiat codes returned by `/common/fiats` (invoice `amount` may be denominated in local fiat).
+ */
+export type OxaPayFiatCurrency =
+  | "USD"
+  | "AMD"
+  | "AUD"
+  | "AZN"
+  | "BRL"
+  | "CAD"
+  | "CHF"
+  | "CNH"
+  | "CNY"
+  | "CZK"
+  | "DKK"
+  | "EUR"
+  | "GBP"
+  | "GHS"
+  | "HKD"
+  | "HUF"
+  | "IDR"
+  | "ILS"
+  | "INR"
+  | "ISK"
+  | "JPY"
+  | "KRW"
+  | "KZT"
+  | "MXN"
+  | "MYR"
+  | "NOK"
+  | "NZD"
+  | "PHP"
+  | "PKR"
+  | "PLN"
+  | "RUB"
+  | "SEK"
+  | "SGD"
+  | "THB"
+  | "TMT"
+  | "TRY"
+  | "UAH"
+  | "UZS"
+  | "VND"
+  | "ZAR";
+
+/** Fiat code with IDE autocomplete while still allowing custom strings. */
+export type OxaPayFiatCode = OxaPayFiatCurrency | (string & {});
+
+/**
+ * Accepted crypto with IDE autocomplete (e.g. `to_currency` on invoices).
  * The `(string & {})` trick preserves literal suggestions in editors.
  */
-export type OxaPayCurrencyCode = OxaPayAcceptedCurrency | (string & {});
+export type OxaPayCryptoCode = OxaPayAcceptedCurrency | (string & {});
+
+/**
+ * Invoice `currency`: amount may be in local fiat or in crypto.
+ * Combines `/common/fiats` symbols and merchant accepted cryptos.
+ */
+export type OxaPayInvoiceCurrencyCode = OxaPayFiatCurrency | OxaPayAcceptedCurrency | (string & {});
+
+/**
+ * Currency code with IDE autocomplete for crypto-oriented fields (white-label `pay_currency`, etc.).
+ * Alias of `OxaPayCryptoCode`.
+ */
+export type OxaPayCurrencyCode = OxaPayCryptoCode;
 
 /** Known payout statuses documented by OxaPay payout status table. */
 export type OxaPayPayoutStatus =
@@ -65,16 +125,16 @@ export type OxaPayPayoutStatus =
 export interface OxaPayGenerateInvoiceRequest {
   /** Invoice amount. */
   amount: number;
-  /** Fiat/crypto currency code used for invoice amount. */
-  currency?: OxaPayCurrencyCode;
+  /** Currency the `amount` is in: supported fiat (see `/common/fiats`) or accepted crypto. */
+  currency?: OxaPayInvoiceCurrencyCode;
   /** Invoice lifetime in minutes. */
   lifetime?: number;
   /** Whether payer pays network fees. */
   fee_paid_by_payer?: number;
   /** Underpaid coverage percentage. */
   under_paid_coverage?: number;
-  /** Optional auto-conversion target currency. */
-  to_currency?: OxaPayCurrencyCode;
+  /** Optional auto-conversion target crypto (accepted payment symbols only). */
+  to_currency?: OxaPayCryptoCode;
   /** Whether to auto-withdraw received funds. */
   auto_withdrawal?: boolean;
   /** Allow paying from mixed assets. */
