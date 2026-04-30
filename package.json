@@ -1,5 +1,5 @@
 {
-  "name": "oxapay-sdk",
+  "name": "oxapay-js-sdk",
   "version": "0.1.1",
   "description": "TypeScript SDK for OxaPay payment APIs",
   "keywords": [
