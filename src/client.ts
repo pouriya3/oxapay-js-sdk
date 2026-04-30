@@ -324,11 +324,12 @@ export class OxaPayClient {
     authType?: "merchant" | "payout" | "general",
   ): Promise<T> {
     const envelope = await this.postPaymentEnvelope<T>(path, body, authType);
-    if (envelope.error) {
+    if (this.hasEnvelopeError(envelope)) {
+      const errorBody = envelope.error ?? {};
       const msg =
-        envelope.error.message ??
+        errorBody.message ??
         envelope.message ??
-        `OxaPay API error${envelope.error.type ? ` (${envelope.error.type})` : ""}`;
+        `OxaPay API error${errorBody.type ? ` (${errorBody.type})` : ""}`;
       throw new OxaPayApiException(msg, envelope as OxaPayApiEnvelope<unknown>);
     }
     return envelope.data;
@@ -340,11 +341,12 @@ export class OxaPayClient {
     authType?: "merchant" | "payout" | "general",
   ): Promise<T> {
     const envelope = await this.getPaymentEnvelope<T>(path, params, authType);
-    if (envelope.error) {
+    if (this.hasEnvelopeError(envelope)) {
+      const errorBody = envelope.error ?? {};
       const msg =
-        envelope.error.message ??
+        errorBody.message ??
         envelope.message ??
-        `OxaPay API error${envelope.error.type ? ` (${envelope.error.type})` : ""}`;
+        `OxaPay API error${errorBody.type ? ` (${errorBody.type})` : ""}`;
       throw new OxaPayApiException(msg, envelope as OxaPayApiEnvelope<unknown>);
     }
     return envelope.data;
@@ -375,6 +377,16 @@ export class OxaPayClient {
       throw new Error("Missing general API key. Provide generalApiKey in OxaPayClient options.");
     }
     return { general_api_key: this.generalApiKey };
+  }
+
+  private hasEnvelopeError(envelope: OxaPayApiEnvelope<unknown>): boolean {
+    if (typeof envelope.status === "number" && envelope.status >= 400) {
+      return true;
+    }
+    if (!envelope.error || typeof envelope.error !== "object") {
+      return false;
+    }
+    return Object.keys(envelope.error).length > 0;
   }
 
   private static getHeader(
