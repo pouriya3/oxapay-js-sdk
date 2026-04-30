@@ -52,6 +52,15 @@ export type OxaPayAcceptedCurrency =
  */
 export type OxaPayCurrencyCode = OxaPayAcceptedCurrency | (string & {});
 
+/** Known payout statuses documented by OxaPay payout status table. */
+export type OxaPayPayoutStatus =
+  | "processing"
+  | "pending"
+  | "confirming"
+  | "confirmed"
+  | "canceled"
+  | "rejected";
+
 /** Request body for creating a hosted merchant invoice. */
 export interface OxaPayGenerateInvoiceRequest {
   /** Invoice amount. */
@@ -290,7 +299,7 @@ export interface OxaPayPayoutInfoResponseData {
   network?: string;
   amount?: number;
   fee?: number;
-  status?: string;
+  status?: OxaPayPayoutStatus | (string & {});
   tx_hash?: string;
   description?: string;
   internal?: boolean;
@@ -324,6 +333,18 @@ export interface OxaPayPayoutHistoryResponseData {
   size?: number;
   total?: number;
   [key: string]: unknown;
+}
+
+/** Query options for account balance endpoint. */
+export interface OxaPayAccountBalanceQuery {
+  /** Optional specific currency to return balance for. */
+  currency?: OxaPayCurrencyCode;
+  [key: string]: string | number | boolean | undefined;
+}
+
+/** Response data for account balance endpoint (currency -> balance). */
+export interface OxaPayAccountBalanceResponseData {
+  [currency: string]: number;
 }
 
 /** Request body for initiating an account asset swap. */

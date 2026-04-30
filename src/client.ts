@@ -1,6 +1,8 @@
 import axios, { AxiosError, type AxiosInstance } from "axios";
 import crypto from "node:crypto";
 import {
+  OxaPayAccountBalanceQuery,
+  OxaPayAccountBalanceResponseData,
   OxaPayAcceptedCurrenciesResponseData,
   OxaPayApiEnvelope,
   OxaPayApiException,
@@ -196,9 +198,19 @@ export class OxaPayClient {
     return this.getJson<OxaPayCommonPricesResponseData>("/common/prices");
   }
 
+  /** Get wallet balances for all/specific currencies (requires general API key). */
+  async accountBalance(query?: OxaPayAccountBalanceQuery): Promise<OxaPayAccountBalanceResponseData> {
+    return this.getJson<OxaPayAccountBalanceResponseData>("/general/account/balance", query, "general");
+  }
+
   /** Get supported crypto currencies with network metadata (no auth required). */
   async currencies(): Promise<OxaPayCommonCurrenciesResponseData> {
     return this.getJson<OxaPayCommonCurrenciesResponseData>("/common/currencies");
+  }
+
+  /** Alias for `currencies()` to align with docs naming ("Supported Currencies"). */
+  async supportedCurrencies(): Promise<OxaPayCommonCurrenciesResponseData> {
+    return this.currencies();
   }
 
   /** Get supported fiat currencies and precision info (no auth required). */
@@ -206,14 +218,29 @@ export class OxaPayClient {
     return this.getJson<OxaPayCommonFiatsResponseData>("/common/fiats");
   }
 
+  /** Alias for `fiats()` to align with docs naming ("Supported Fiat Currencies"). */
+  async supportedFiatCurrencies(): Promise<OxaPayCommonFiatsResponseData> {
+    return this.fiats();
+  }
+
   /** Get supported blockchain network names (no auth required). */
   async networks(): Promise<OxaPayCommonNetworksResponseData> {
     return this.getJson<OxaPayCommonNetworksResponseData>("/common/networks");
   }
 
+  /** Alias for `networks()` to align with docs naming ("Supported Networks"). */
+  async supportedNetworks(): Promise<OxaPayCommonNetworksResponseData> {
+    return this.networks();
+  }
+
   /** Check OxaPay API operational status (no auth required). */
   async monitor(): Promise<OxaPayCommonMonitorResponseData> {
     return this.getJson<OxaPayCommonMonitorResponseData>("/common/monitor");
+  }
+
+  /** Alias for `monitor()` to align with docs naming ("System Status"). */
+  async systemStatus(): Promise<OxaPayCommonMonitorResponseData> {
+    return this.monitor();
   }
 
   /**
